@@ -141,7 +141,13 @@ export async function GET() {
 
       // Find the current active period (not just closest time)
       // We need to find which period we're currently IN, not which event is closest
-      const currentTime = new Date();
+      // IMPORTANT: NOAA returns times in LST/LDT (Eastern Time), we need to parse them correctly
+      const now = new Date();
+
+      // Convert current time to Eastern Time for comparison
+      // Create a formatter for Eastern Time
+      const easternTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+
       let activePrediction = null;
 
       // Sort predictions by time
@@ -151,8 +157,9 @@ export async function GET() {
 
       // Find the last prediction that has already occurred
       for (let i = sortedPredictions.length - 1; i >= 0; i--) {
+        // Parse NOAA time as Eastern Time (it's already in LST/LDT)
         const predTime = new Date(sortedPredictions[i].Time);
-        if (predTime <= currentTime) {
+        if (predTime <= easternTime) {
           activePrediction = sortedPredictions[i];
           break;
         }
@@ -178,7 +185,7 @@ export async function GET() {
 
           // Calculate time ratio (how far between the two predictions we are)
           const totalDuration = nextTime.getTime() - thisTime.getTime();
-          const elapsed = currentTime.getTime() - thisTime.getTime();
+          const elapsed = easternTime.getTime() - thisTime.getTime();
           const ratio = totalDuration > 0 ? elapsed / totalDuration : 0;
 
           // Interpolate velocity (linear interpolation)
