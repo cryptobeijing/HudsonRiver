@@ -23,7 +23,7 @@ export function assessSafety(
       recommendations.push('🚫 High river flow - DO NOT kayak');
       recommendations.push('Strong currents present');
     } else if (discharge > DISCHARGE_CAUTION) {
-      if (level !== 'danger') level = 'caution';
+      if (level === 'safe') level = 'caution';
       recommendations.push('⚠️ Elevated flow - experienced kayakers only');
       recommendations.push('Stay close to shore');
     }
@@ -36,7 +36,7 @@ export function assessSafety(
       recommendations.push('🚫 Strong currents detected');
       recommendations.push('Wait for slack tide');
     } else if (currentSpeed > CURRENT_CAUTION) {
-      if (level !== 'danger') level = 'caution';
+      if (level === 'safe') level = 'caution';
       recommendations.push('⚠️ Moderate currents');
       recommendations.push('Plan route carefully');
     }
