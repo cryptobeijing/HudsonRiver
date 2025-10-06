@@ -29,7 +29,10 @@ export default function Header() {
             <div className="flex items-center gap-6">
               <div className="text-right">
                 <p className="text-xs text-blue-200">Monitoring</p>
-                <p className="font-semibold">Hoboken Area</p>
+                <p className="font-semibold">Hudson River Entrance (NYH1927)</p>
+                <p className="text-xs text-blue-100 mt-0.5">
+                  LAT/LON: 40.7076° N 74.0253° W
+                </p>
               </div>
               <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl backdrop-blur-sm">
                 📍

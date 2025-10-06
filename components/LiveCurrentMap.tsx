@@ -121,9 +121,14 @@ export default function LiveCurrentMap({ tideData }: LiveCurrentMapProps) {
           <span className="font-semibold">Tide State:</span> {tide.current}
         </p>
         <p className="text-xs text-gray-600 mt-1">
-          {tide.current.includes('Rising') && '📈 Water level increasing, current flows upstream (north)'}
-          {tide.current.includes('Falling') && '📉 Water level decreasing, current flows downstream (south)'}
+          {(tide.current.includes('Rising') || tide.current.includes('Flood')) && '📈 Flood current - flows upstream (north)'}
+          {(tide.current.includes('Falling') || tide.current.includes('Ebb')) && '📉 Ebb current - flows downstream (south)'}
         </p>
+        {current.source && (
+          <p className="text-xs text-gray-500 mt-2 italic">
+            Data source: {current.source}
+          </p>
+        )}
       </div>
     </div>
   );

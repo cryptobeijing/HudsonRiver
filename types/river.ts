@@ -33,6 +33,8 @@ export interface TideData {
   station: {
     id: string;
     name: string;
+    currentsId?: string;
+    currentsName?: string;
   };
   tide: {
     current: string;
@@ -53,6 +55,7 @@ export interface TideData {
     direction: number | null;
     speedUnit: string;
     available: boolean;
+    source?: string;
   };
 }
 

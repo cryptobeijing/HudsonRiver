@@ -9,23 +9,27 @@ export function assessSafety(
   const recommendations: string[] = [];
 
   // Discharge thresholds (cubic feet per second)
-  const DISCHARGE_CAUTION = 15000;
-  const DISCHARGE_DANGER = 25000;
+  // Normal Hudson River flow is ~5,000-20,000 cfs
+  // Only flag danger for extreme flooding conditions
+  const DISCHARGE_CAUTION = 30000;
+  const DISCHARGE_DANGER = 50000; // Major flooding
 
   // Current speed thresholds (knots)
-  const CURRENT_CAUTION = 1.5;
-  const CURRENT_DANGER = 2.5;
+  // Normal tidal currents in Hudson are 1-3 knots
+  // Only flag danger for extreme conditions
+  const CURRENT_CAUTION = 2.5;
+  const CURRENT_DANGER = 4.0; // Unusually strong, likely storm surge
 
   // Assess discharge
   if (discharge) {
     if (discharge > DISCHARGE_DANGER) {
       level = 'danger';
-      recommendations.push('🚫 High river flow - DO NOT kayak');
-      recommendations.push('Strong currents present');
+      recommendations.push('🚫 EXTREME FLOODING - DO NOT kayak');
+      recommendations.push('Major storm or flood event - dangerous conditions');
     } else if (discharge > DISCHARGE_CAUTION) {
       if (level === 'safe') level = 'caution';
-      recommendations.push('⚠️ Elevated flow - experienced kayakers only');
-      recommendations.push('Stay close to shore');
+      recommendations.push('⚠️ High river flow - experienced kayakers only');
+      recommendations.push('Stay close to shore and be aware of stronger currents');
     }
   }
 
@@ -33,12 +37,12 @@ export function assessSafety(
   if (currentSpeed && currentSpeed > 0) {
     if (currentSpeed > CURRENT_DANGER) {
       level = 'danger';
-      recommendations.push('🚫 Strong currents detected');
-      recommendations.push('Wait for slack tide');
+      recommendations.push('🚫 EXTREME CURRENTS - DO NOT kayak');
+      recommendations.push('Unusually strong currents - likely storm or extreme conditions');
     } else if (currentSpeed > CURRENT_CAUTION) {
       if (level === 'safe') level = 'caution';
-      recommendations.push('⚠️ Moderate currents');
-      recommendations.push('Plan route carefully');
+      recommendations.push('⚠️ Strong currents - experienced kayakers only');
+      recommendations.push('Consider waiting for slack tide or stay near shore');
     }
   }
 
