@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+/* Water effect animations */
+@keyframes water-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.water-gradient {
+  background: linear-gradient(
+    90deg,
+    #1e40af 0%,
+    #3b82f6 25%,
+    #60a5fa 50%,
+    #3b82f6 75%,
+    #1e40af 100%
+  );
+  background-size: 200% 100%;
+  animation: water-flow 8s ease infinite;
+}
+
+/* Current arrow animations */
+@keyframes current-flow {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateX(5px) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 0.7;
+  }
+}
+
+.current-arrow {
+  animation: current-flow 2s ease-in-out infinite;
+}
+
+/* Tide pulse */
+@keyframes tide-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+.tide-indicator {
+  animation: tide-pulse 3s ease-in-out infinite;
+}
+
+/* Safety zone colors */
+.safety-green {
+  @apply bg-green-100 border-green-500 text-green-800;
+}
+
+.safety-yellow {
+  @apply bg-yellow-100 border-yellow-500 text-yellow-800;
+}
+
+.safety-red {
+  @apply bg-red-100 border-red-500 text-red-800;
+}
+
+/* Data card hover effects */
+.data-card {
+  @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+}
+
+/* River wave decoration */
+.river-wave {
+  position: relative;
+  overflow: hidden;
+}
+
+.river-wave::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: wave-shine 3s ease-in-out infinite;
+}
+
+@keyframes wave-shine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
