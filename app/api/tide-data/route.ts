@@ -81,7 +81,11 @@ export async function GET() {
 
     // Parse tide predictions
     const predictions = tideData.predictions || [];
-    const now = new Date();
+
+    // Convert current time to Eastern Time for comparison with NOAA data
+    // NOAA tide data is also in LST/LDT (Eastern Time)
+    const serverTime = new Date();
+    const easternTimeNow = new Date(serverTime.toLocaleString('en-US', { timeZone: 'America/New_York' }));
 
     // Find next high and low tides
     let nextHigh = null;
@@ -89,7 +93,7 @@ export async function GET() {
 
     for (const pred of predictions) {
       const predTime = new Date(pred.t);
-      if (predTime > now) {
+      if (predTime > easternTimeNow) {
         if (pred.type === 'H' && !nextHigh) {
           nextHigh = {
             time: pred.t,
@@ -112,14 +116,14 @@ export async function GET() {
     let tideState = 'Unknown';
     const sortedPreds = predictions.filter((p: any) => {
       const t = new Date(p.t);
-      return Math.abs(t.getTime() - now.getTime()) < 12 * 60 * 60 * 1000;
+      return Math.abs(t.getTime() - easternTimeNow.getTime()) < 12 * 60 * 60 * 1000;
     }).sort((a: any, b: any) => new Date(a.t).getTime() - new Date(b.t).getTime());
 
     for (let i = 0; i < sortedPreds.length - 1; i++) {
       const current = new Date(sortedPreds[i].t);
       const next = new Date(sortedPreds[i + 1].t);
 
-      if (now >= current && now <= next) {
+      if (easternTimeNow >= current && easternTimeNow <= next) {
         if (sortedPreds[i].type === 'L' && sortedPreds[i + 1].type === 'H') {
           tideState = 'Rising (Flood)';
         } else if (sortedPreds[i].type === 'H' && sortedPreds[i + 1].type === 'L') {
@@ -142,11 +146,7 @@ export async function GET() {
       // Find the current active period (not just closest time)
       // We need to find which period we're currently IN, not which event is closest
       // IMPORTANT: NOAA returns times in LST/LDT (Eastern Time), we need to parse them correctly
-      const now = new Date();
-
-      // Convert current time to Eastern Time for comparison
-      // Create a formatter for Eastern Time
-      const easternTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      // Use the easternTimeNow that was already calculated above
 
       let activePrediction = null;
 
@@ -159,7 +159,7 @@ export async function GET() {
       for (let i = sortedPredictions.length - 1; i >= 0; i--) {
         // Parse NOAA time as Eastern Time (it's already in LST/LDT)
         const predTime = new Date(sortedPredictions[i].Time);
-        if (predTime <= easternTime) {
+        if (predTime <= easternTimeNow) {
           activePrediction = sortedPredictions[i];
           break;
         }
@@ -185,7 +185,7 @@ export async function GET() {
 
           // Calculate time ratio (how far between the two predictions we are)
           const totalDuration = nextTime.getTime() - thisTime.getTime();
-          const elapsed = easternTime.getTime() - thisTime.getTime();
+          const elapsed = easternTimeNow.getTime() - thisTime.getTime();
           const ratio = totalDuration > 0 ? elapsed / totalDuration : 0;
 
           // Interpolate velocity (linear interpolation)
