@@ -81,7 +81,7 @@ export default function LiveCurrentMap({ tideData }: LiveCurrentMapProps) {
                   opacity: 1 - i * 0.2,
                 }}
               >
-                ➡️
+                ⬆️
               </div>
             ))}
           </div>
