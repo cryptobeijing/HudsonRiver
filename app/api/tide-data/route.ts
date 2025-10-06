@@ -136,42 +136,63 @@ export async function GET() {
     let currentsAvailable = false;
 
     if (currentsData && currentsData.current_predictions && currentsData.current_predictions.cp) {
-      // Find the most recent current prediction
       const currentPredictions = currentsData.current_predictions.cp;
       console.log('Currents predictions count:', currentPredictions.length);
 
-      // Find current or upcoming prediction
+      // Find the current active period (not just closest time)
+      // We need to find which period we're currently IN, not which event is closest
       const currentTime = new Date();
-      let closestPrediction = null;
-      let minDiff = Infinity;
+      let activePrediction = null;
 
-      for (const pred of currentPredictions) {
-        const predTime = new Date(pred.Time);
-        const diff = Math.abs(predTime.getTime() - currentTime.getTime());
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestPrediction = pred;
+      // Sort predictions by time
+      const sortedPredictions = [...currentPredictions].sort((a, b) =>
+        new Date(a.Time).getTime() - new Date(b.Time).getTime()
+      );
+
+      // Find the last prediction that has already occurred
+      for (let i = sortedPredictions.length - 1; i >= 0; i--) {
+        const predTime = new Date(sortedPredictions[i].Time);
+        if (predTime <= currentTime) {
+          activePrediction = sortedPredictions[i];
+          break;
         }
       }
 
-      if (closestPrediction) {
-        const velocity = parseFloat(closestPrediction.Velocity_Major);
+      // If no past prediction found, use the first one
+      if (!activePrediction && sortedPredictions.length > 0) {
+        activePrediction = sortedPredictions[0];
+      }
+
+      if (activePrediction) {
+        const velocity = parseFloat(activePrediction.Velocity_Major);
         currentSpeed = Math.abs(velocity);
-        currentType = closestPrediction.Type; // "ebb", "flood", or "slack"
+        currentType = activePrediction.Type; // "ebb", "flood", or "slack"
 
         // Set direction based on current type
         // Flood = upstream/north (11°), Ebb = downstream/south (183°)
         if (currentType === 'flood') {
-          currentDirection = parseFloat(closestPrediction.meanFloodDir);
+          currentDirection = parseFloat(activePrediction.meanFloodDir);
         } else if (currentType === 'ebb') {
-          currentDirection = parseFloat(closestPrediction.meanEbbDir);
+          currentDirection = parseFloat(activePrediction.meanEbbDir);
         } else {
-          // Slack water - use last known direction
-          currentDirection = parseFloat(closestPrediction.meanFloodDir);
+          // Slack water - check next prediction to determine direction
+          const currentIndex = sortedPredictions.indexOf(activePrediction);
+          if (currentIndex < sortedPredictions.length - 1) {
+            const nextPred = sortedPredictions[currentIndex + 1];
+            if (nextPred.Type === 'flood') {
+              currentDirection = parseFloat(nextPred.meanFloodDir);
+            } else if (nextPred.Type === 'ebb') {
+              currentDirection = parseFloat(nextPred.meanEbbDir);
+            } else {
+              currentDirection = parseFloat(activePrediction.meanEbbDir);
+            }
+          } else {
+            currentDirection = parseFloat(activePrediction.meanEbbDir);
+          }
         }
 
         currentsAvailable = true;
-        console.log('Current type:', currentType, 'Speed:', currentSpeed, 'Direction:', currentDirection);
+        console.log('Current type:', currentType, 'Speed:', currentSpeed, 'Direction:', currentDirection, 'Time:', activePrediction.Time);
       }
     }
 
