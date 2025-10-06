@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering - don't cache at build time
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // NOAA The Battery station for tides (near Hoboken)
 const NOAA_TIDE_STATION = '8518750'; // The Battery, NY
 // NOAA Currents station - Hudson River north of George Washington Bridge

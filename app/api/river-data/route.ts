@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering - don't cache at build time
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // USGS Hudson River gauges - using stations with active data
 // Note: Lower Hudson (NYC area) stations don't provide real-time discharge data
 // Using upstate Hudson River stations with reliable discharge and gage height data
