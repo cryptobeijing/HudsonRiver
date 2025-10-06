@@ -164,9 +164,39 @@ export async function GET() {
       }
 
       if (activePrediction) {
+        const currentIndex = sortedPredictions.indexOf(activePrediction);
         const velocity = parseFloat(activePrediction.Velocity_Major);
-        currentSpeed = Math.abs(velocity);
         currentType = activePrediction.Type; // "ebb", "flood", or "slack"
+
+        // Interpolate current speed between this prediction and the next
+        if (currentIndex < sortedPredictions.length - 1) {
+          const nextPred = sortedPredictions[currentIndex + 1];
+          const thisTime = new Date(activePrediction.Time);
+          const nextTime = new Date(nextPred.Time);
+          const thisVelocity = parseFloat(activePrediction.Velocity_Major);
+          const nextVelocity = parseFloat(nextPred.Velocity_Major);
+
+          // Calculate time ratio (how far between the two predictions we are)
+          const totalDuration = nextTime.getTime() - thisTime.getTime();
+          const elapsed = currentTime.getTime() - thisTime.getTime();
+          const ratio = totalDuration > 0 ? elapsed / totalDuration : 0;
+
+          // Interpolate velocity (linear interpolation)
+          const interpolatedVelocity = thisVelocity + (nextVelocity - thisVelocity) * ratio;
+          currentSpeed = Math.abs(interpolatedVelocity);
+
+          // Determine current type based on interpolated velocity
+          if (Math.abs(interpolatedVelocity) < 0.2) {
+            currentType = 'slack';
+          } else if (interpolatedVelocity > 0) {
+            currentType = 'flood';
+          } else {
+            currentType = 'ebb';
+          }
+        } else {
+          // No next prediction, use current value
+          currentSpeed = Math.abs(velocity);
+        }
 
         // Set direction based on current type
         // Flood = upstream/north (11°), Ebb = downstream/south (183°)
@@ -176,7 +206,6 @@ export async function GET() {
           currentDirection = parseFloat(activePrediction.meanEbbDir);
         } else {
           // Slack water - check next prediction to determine direction
-          const currentIndex = sortedPredictions.indexOf(activePrediction);
           if (currentIndex < sortedPredictions.length - 1) {
             const nextPred = sortedPredictions[currentIndex + 1];
             if (nextPred.Type === 'flood') {
